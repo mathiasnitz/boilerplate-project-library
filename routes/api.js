@@ -50,6 +50,11 @@ module.exports = function (app) {
       let title = req.body.title;
       //response will contain new book object including atleast _id and title
 
+      if (!title) {
+        return res.json('missing required field title');
+      }
+
+
       const newBook = new Book({
         title: title,
         commentcount: 0
@@ -61,7 +66,7 @@ module.exports = function (app) {
         res.json(savedBook);
 
       } catch (err) {
-        res.status(500).json({ error: 'Fehler beim Speichern' });
+        res.status(500).json({ error: 'server fehler' });
       }
     })
     
@@ -95,7 +100,7 @@ module.exports = function (app) {
       const book = await Book.findById(bookid);
   
       if (!book) {
-        return res.status(404).json({ message: 'ID not found' });
+        return res.json('no book exists');
       }
   
       const result = {
@@ -126,7 +131,11 @@ module.exports = function (app) {
         const book = await Book.findById(bookid);
 
         if (!book) {
-          return res.status(404).json({ message: 'ID not found' });
+          return res.json('no book exists');
+        }
+
+        if (!comment) {
+          return res.json('missing required field comment');
         }
 
         book.comments.push(comment);
@@ -162,7 +171,7 @@ module.exports = function (app) {
         const book = await Book.findById(bookid);
 
         if (!book) {
-          return res.status(404).json({ message: 'ID not found' });
+          return res.json('no book exists');
         }
 
         await book.deleteOne();
