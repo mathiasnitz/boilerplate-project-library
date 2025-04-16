@@ -112,10 +112,41 @@ module.exports = function (app) {
     }
   })
     
-    .post(function(req, res){
+    .post(async function(req, res){
       let bookid = req.params.id;
       let comment = req.body.comment;
       //json res format same as .get
+
+      if (!mongoose.Types.ObjectId.isValid(bookid)) {
+        return res.status(404).json({ message: 'ID not found' });
+      }
+
+      try {
+
+        const book = await Book.findById(bookid);
+
+        if (!book) {
+          return res.status(404).json({ message: 'ID not found' });
+        }
+
+        book.comments.push(comment);
+
+        await book.save();
+
+        book.commentcount = book.comments.length;
+
+        const result = {
+          _id: book._id,
+          title: book.title,
+          comments: book.comments || []
+        };
+
+        res.json(result);
+
+      } catch (error) {
+        res.status(500).json({ message: 'server fehler' });
+      }
+
     })
     
     .delete(async function(req, res){
